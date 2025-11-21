@@ -28,7 +28,11 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   /// Bloc de ubicación para obtener datos de la posición del usuario.
   final LocationBloc locationBloc;
 
+<<<<<<< HEAD
+  /// Suscripción para escuchar los cambios de estado del [LocationBloc].
+=======
 /// Suscripción para escuchar los cambios de estado del [LocationBloc].
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
   StreamSubscription<LocationState>? locationSubscription;
 
   /// Coordenadas actuales del centro del mapa.
@@ -43,6 +47,10 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     on<OnStartFollowingUserEvent>(_onStartFollowingUser);
     on<OnStopFollowingUserEvent>(
         (event, emit) => emit(state.copyWith(isFollowingUser: false)));
+<<<<<<< HEAD
+    on<OnUpdateUserPolylinesEvent>(_onPolylineNewPoint);
+=======
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
     on<OnDisplayPolylinesEvent>((event, emit) {
       final currentPolylines = Map<String, Polyline>.from(event.polylines);
 
@@ -55,13 +63,21 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
       emit(state.copyWith(polylines: currentPolylines, markers: event.markers));
     });
+<<<<<<< HEAD
+
+=======
     on<OnDisplayPolylinesEvent>((event, emit) => emit(
         state.copyWith(polylines: event.polylines, markers: event.markers)));
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
     on<OnToggleShowUserRouteEvent>((event, emit) =>
         emit(state.copyWith(showUserRoute: !state.showUserRoute)));
     on<OnRemovePoiMarkerEvent>(_onRemovePoiMarker);
     on<OnAddPoiMarkerEvent>(_onAddPoiMarker);
+<<<<<<< HEAD
+    on<OnClearMapEvent>(_onClearMap); // Limpia todos los elementos del mapa.
+=======
    on<OnClearMapEvent>(_onClearMap); // Limpia todos los elementos del mapa.
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
 
     // Escucha los cambios de ubicación en el LocationBloc
     locationSubscription = locationBloc.stream.listen((locationState) {
@@ -71,7 +87,11 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         add(OnUpdateUserPolylinesEvent(locationState.myLocationHistory));
       }
 
+<<<<<<< HEAD
+      // Si no se está siguiendo al usuario, no mover la cámara.
+=======
 // Si no se está siguiendo al usuario, no mover la cámara.
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
       if (!state.isFollowingUser) return;
       if (locationState.lastKnownLocation == null) return;
 
@@ -81,14 +101,22 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }
 
   /// Inicializa el mapa con el controlador y el contexto.
+<<<<<<< HEAD
+  Future<void> _onInitMap(
+=======
 Future<void> _onInitMap(
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
       OnMapInitializedEvent event, Emitter<MapState> emit) async {
     _mapController = event.mapController;
     log.i('Mapa inicializado. Controlador del mapa establecido.');
     emit(state.copyWith(isMapInitialized: true, mapContext: event.mapContext));
   }
 
+<<<<<<< HEAD
+  /// Mueve la cámara del mapa a una ubicación específica.
+=======
    /// Mueve la cámara del mapa a una ubicación específica.
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
   ///
   /// - [latLng]: Coordenadas a las que se moverá la cámara.
   Future<void> moveCamera(LatLng latLng) async {
@@ -121,7 +149,11 @@ Future<void> _onInitMap(
 
     if (!state.showUserRoute) {
       log.i('showUserRoute está desactivado. No se agrega la polilínea.');
+<<<<<<< HEAD
+      return; // Salir si la ruta del usuario no debe mostrarse.
+=======
        return; // Salir si la ruta del usuario no debe mostrarse.
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
     }
 
     final myRoute = Polyline(
@@ -135,11 +167,16 @@ Future<void> _onInitMap(
 
     final currentPolylines = Map<String, Polyline>.from(state.polylines);
     currentPolylines['myRoute'] = myRoute;
+
     emit(state.copyWith(polylines: currentPolylines));
 
   }
 
+<<<<<<< HEAD
+  /// Dibuja un EcoCityTour en el mapa, añadiendo polilíneas y marcadores.
+=======
   // Dibuja un EcoCityTour en el mapa, añadiendo polilíneas y marcadores.
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
   ///
   /// - [tour]: Contiene los puntos de interés y la ruta del tour.
   Future<void> drawEcoCityTour(EcoCityTour tour) async {
@@ -179,7 +216,11 @@ Future<void> _onInitMap(
 
     final currentPolylines = Map<String, Polyline>.from(state.polylines);
 
+<<<<<<< HEAD
+    // Añadir la polilínea del tour.
+=======
     /// Añadir la polilínea del tour.
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
     currentPolylines['route'] = myRoute;
 
     // Incluir la polilínea del usuario si está activa.
@@ -216,7 +257,11 @@ Future<void> _onInitMap(
     );
   }
 
+<<<<<<< HEAD
+  /// Elimina un marcador de punto de interés del mapa.
+=======
    /// Elimina un marcador de punto de interés del mapa.
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
   void _onRemovePoiMarker(
       OnRemovePoiMarkerEvent event, Emitter<MapState> emit) {
     log.i('Eliminando marcador de POI: ${event.poiName}');

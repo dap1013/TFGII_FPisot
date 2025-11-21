@@ -1,3 +1,110 @@
+<<<<<<< HEAD
+import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:project_app/blocs/tour/tour_bloc.dart';
+import 'package:project_app/blocs/map/map_bloc.dart';
+import 'package:project_app/delegates/delegates.dart';
+
+import 'package:project_app/services/places_service.dart';
+
+class MockTourBloc extends Mock implements TourBloc {}
+
+class MockMapBloc extends Mock implements MapBloc {}
+
+class MockPlacesService extends Mock implements PlacesService {}
+
+void main() {
+  late MockTourBloc mockTourBloc;
+
+  late SearchDestinationDelegate searchDelegate;
+
+  setUpAll(() {
+    dotenv.testLoad(mergeWith: {
+      'GOOGLE_PLACES_API_KEY': 'mock-google-places-api-key',
+      'FIREBASE_API_KEY': 'mock-firebase-api-key',
+    });
+  });
+
+  setUp(() {
+    mockTourBloc = MockTourBloc();
+
+    searchDelegate = SearchDestinationDelegate();
+  });
+
+  group('SearchDestinationDelegate Tests', () {
+    testWidgets('Cierra el buscador cuando se presiona el botón de limpiar (X)',
+        (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BlocProvider.value(
+              value: mockTourBloc,
+              child: Builder(
+                builder: (BuildContext context) {
+                  return IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: () {
+                      showSearch(context: context, delegate: searchDelegate);
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Invoca el buscador
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+
+      // Presiona el botón de limpiar (X)
+      await tester.tap(find.byIcon(Icons.clear));
+      await tester.pumpAndSettle();
+
+      // Verifica que el buscador se haya cerrado
+      expect(find.byType(SearchDestinationDelegate), findsNothing);
+    });
+
+    testWidgets('Cierra el buscador cuando se presiona el botón de retroceso',
+        (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BlocProvider.value(
+              value: mockTourBloc,
+              child: Builder(
+                builder: (BuildContext context) {
+                  return IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: () {
+                      showSearch(context: context, delegate: searchDelegate);
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Invoca el buscador
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+
+      // Presiona el botón de retroceso
+      await tester.tap(find.byIcon(Icons.arrow_back_ios));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SearchDestinationDelegate), findsNothing);
+    });
+  });
+}
+=======
 SF:lib\blocs\location\location_event.dart
 DA:9,30
 DA:11,0
@@ -1951,3 +2058,4 @@ DA:79,3
 LF:18
 LH:18
 end_of_record
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2

@@ -33,7 +33,11 @@ class TourBloc extends Bloc<TourEvent, TourState> {
   /// Bloc encargado de gestionar el mapa y los marcadores.
   final MapBloc mapBloc;
 
+<<<<<<< HEAD
+  /// Repositorio utilizado para guardar y cargar tours en persistencia.
+=======
    /// Repositorio utilizado para guardar y cargar tours en persistencia.
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
   final EcoCityTourRepository ecoCityTourRepository;
 
   /// Constructor de [TourBloc].
@@ -49,8 +53,12 @@ class TourBloc extends Bloc<TourEvent, TourState> {
     on<OnRemovePoiEvent>(_onRemovePoi); // Eliminar un POI del tour
     on<OnAddPoiEvent>(_onAddPoi); // Añadir un POI al tour
     on<OnJoinTourEvent>(_onJoinTour); // Unirse al tour
+<<<<<<< HEAD
+=======
     // Resetear el tour actual
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
     on<ResetTourEvent>((event, emit) {
+      // Resetear el tour actual
       emit(state.copyWith(ecoCityTour: null, isJoined: false));
       mapBloc.add(const OnClearMapEvent()); // Limpia el mapa
     });
@@ -74,7 +82,11 @@ class TourBloc extends Bloc<TourEvent, TourState> {
     try {
       // Obtener POIs desde el servicio Gemini
       final pois = await GeminiService.fetchGeminiData(
+<<<<<<< HEAD
+        city: event.city,
+=======
           city: event.city,
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
         nPoi: event.numberOfSites,
         userPreferences: event.userPreferences,
         maxTime: event.maxTime,
@@ -83,7 +95,11 @@ class TourBloc extends Bloc<TourEvent, TourState> {
       );
       log.d('TourBloc: Fetched ${pois.length} POIs for ${event.city}');
 
+<<<<<<< HEAD
+      // Obtener información adicional de Google Places
+=======
        // Obtener información adicional de Google Places
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
       List<PointOfInterest> updatedPois = [];
       for (PointOfInterest poi in pois) {
         final placeData =
@@ -94,7 +110,10 @@ class TourBloc extends Bloc<TourEvent, TourState> {
           final String apiKey = dotenv.env['GOOGLE_PLACES_API_KEY'] ?? '';
           final location = placeData['location'];
 
+<<<<<<< HEAD
+=======
           
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
           final updatedPoi = PointOfInterest(
             gps: location != null
                 ? LatLng(
@@ -202,7 +221,11 @@ class TourBloc extends Bloc<TourEvent, TourState> {
             'El POI eliminado es la ubicación actual. Cambiando isJoined a false.');
         emit(state.copyWith(isJoined: false));
       }
+<<<<<<< HEAD
+
+=======
       
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
       // Optimizar el tour con los POIs restantes
       await _updateTourWithPois(updatedPois, emit);
 
@@ -218,8 +241,14 @@ class TourBloc extends Bloc<TourEvent, TourState> {
 
   /// Optimiza un tour basado en una lista actualizada de POIs.
   Future<void> _updateTourWithPois(
+<<<<<<< HEAD
+      List<PointOfInterest> pois, Emitter<TourState> emit) async {
+    log.d('TourBloc: Updating tour with ${pois.length} POIs');
+
+=======
     List<PointOfInterest> pois, Emitter<TourState> emit) async {
     log.d('TourBloc: Updating tour with ${pois.length} POIs');
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
     if (pois.isEmpty) {
       emit(state.copyWithNull());
       return;
@@ -250,7 +279,11 @@ class TourBloc extends Bloc<TourEvent, TourState> {
     await ecoCityTourRepository.saveTour(state.ecoCityTour!, tourName);
   }
 
+<<<<<<< HEAD
+  /// Carga todos los tours guardados desde el repositorio.
+=======
   /// Carga un tour guardado específico desde el repositorio.
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
   Future<void> _onLoadSavedTours(
       LoadSavedToursEvent event, Emitter<TourState> emit) async {
     emit(state.copyWith(isLoading: true));
@@ -265,18 +298,29 @@ class TourBloc extends Bloc<TourEvent, TourState> {
     }
   }
 
+<<<<<<< HEAD
+  /// Carga un tour guardado específico desde el repositorio.
+=======
   /// Maneja la lógica para cargar un tour guardado específico desde el repositorio.
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
   Future<void> _onLoadTourFromSaved(
       LoadTourFromSavedEvent event, Emitter<TourState> emit) async {
     emit(state.copyWith(isLoading: true, hasError: false));
 
     try {
+<<<<<<< HEAD
+      final savedTour =
+          await ecoCityTourRepository.getTourById(event.documentId);
+
+      if (savedTour != null) {
+=======
 
       final savedTour =
           await ecoCityTourRepository.getTourById(event.documentId);
 
       if (savedTour != null) {
 
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2
         emit(state.copyWith(ecoCityTour: savedTour, isLoading: false));
         log.i('Tour cargado correctamente desde Firestore: ${savedTour.city}');
 
@@ -291,4 +335,8 @@ class TourBloc extends Bloc<TourEvent, TourState> {
       emit(state.copyWith(isLoading: false, hasError: true));
     }
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 8bb91194fc96e233c9243ce5c3e35853322230b2

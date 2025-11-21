@@ -149,4 +149,10 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> {
   }
 
   }
+
+  /// Comprueba si el GPS y los permisos están listos.
+  /// Devuelve `true` si ambos están habilitados.
+  bool isAllReady() {
+    return state.isGpsEnabled && state.isGpsPermissionGranted;
+  }
 }

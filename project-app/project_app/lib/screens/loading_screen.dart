@@ -14,6 +14,7 @@ class LoadingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocListener<GpsBloc, GpsState>(
+<<<<<<< HEAD
       /// Escucha los cambios en el estado del [GpsBloc] para manejar la navegación.
         listener: (context, state) {
     if (state.isGpsEnabled && state.isGpsPermissionGranted) {
@@ -22,9 +23,17 @@ class LoadingScreen extends StatelessWidget {
       context.go('/gps-access');
     }
   },
+=======
+      listener: (context, state) {
+        if (state.isGpsEnabled && state.isGpsPermissionGranted) {
+          context.go('/tour-selection');
+        } else {
+          context.go('/gps-access');
+        }
+      },
+>>>>>>> 49fd9d028196b8dd996f93f9918082a34cfccb08
       child: const Scaffold(
         body: Center(
-          /// Muestra un indicador de carga mientras se verifica el estado.
           child: CircularProgressIndicator(),
         ),
       ),

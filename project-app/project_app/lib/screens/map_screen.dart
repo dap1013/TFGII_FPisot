@@ -111,6 +111,12 @@ Widget _buildMapView(LocationState locationState) {
         filteredPolylines.removeWhere((key, _) => key == 'myRoute');
       }
 
+      // Filtrar las polilíneas según el estado de showUserRoute
+      Map<String, Polyline> filteredPolylines = Map.from(mapState.polylines);
+      if (!mapState.showUserRoute) {
+        filteredPolylines.removeWhere((key, _) => key == 'myRoute');
+      }
+
       return Stack(
         children: [
           MapView(
