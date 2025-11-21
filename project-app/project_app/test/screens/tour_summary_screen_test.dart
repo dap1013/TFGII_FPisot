@@ -1,86 +1,148 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:project_app/blocs/tour/tour_bloc.dart';
-import 'package:project_app/models/eco_city_tour.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:project_app/blocs/blocs.dart';
 import 'package:project_app/screens/screens.dart';
-import '../test_helpers.dart';
 
-class MockTourBloc extends Mock implements TourBloc {}
+class MockTourBloc extends MockBloc<TourEvent, TourState> implements TourBloc {}
+
+class MockGpsBloc extends MockBloc<GpsEvent, GpsState> implements GpsBloc {}
 
 void main() {
   late MockTourBloc mockTourBloc;
+  late MockGpsBloc mockGpsBloc;
 
-  setUpAll(() async {
-    setupTestEnvironment(); // Configura EasyLocalization
-    await EasyLocalization.ensureInitialized();
+  late GoRouter goRouter;
+
+  setUpAll(() {
+    EasyLocalization.logger.enableLevels = [];
+    registerFallbackValue(const LoadTourEvent(
+      mode: 'walking',
+      city: '',
+      numberOfSites: 2,
+      userPreferences: [],
+      maxTime: 90,
+      systemInstruction: '',
+    ));
+    registerFallbackValue(const LoadSavedToursEvent());
+    registerFallbackValue(const OnGpsAndPermissionEvent(
+      isGpsEnabled: true,
+      isGpsPermissionGranted: true,
+    ));
   });
 
   setUp(() {
     mockTourBloc = MockTourBloc();
+    mockGpsBloc = MockGpsBloc();
 
-    whenListen(
-      mockTourBloc,
-      const Stream<TourState>.empty(),
-      initialState: const TourState(ecoCityTour: null),
+    goRouter = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => MultiBlocProvider(
+            providers: [
+              BlocProvider<TourBloc>.value(value: mockTourBloc),
+              BlocProvider<GpsBloc>.value(value: mockGpsBloc),
+            ],
+            child: const TourSelectionScreen(),
+          ),
+        ),
+        GoRoute(
+          path: '/gps-access',
+          builder: (context, state) => const GpsAccessScreen(),
+        ),
+        GoRoute(
+          path: '/saved-tours',
+          name: 'saved-tours',
+          builder: (context, state) => BlocProvider<TourBloc>.value(
+            value: mockTourBloc,
+            child: const SavedToursScreen(),
+          ),
+        ),
+      ],
     );
   });
 
-  Widget createTestWidget(Widget child) {
+  tearDown(() {
+    mockTourBloc.close();
+    mockGpsBloc.close();
+  });
+
+  Widget createTestWidget() {
     return EasyLocalization(
       supportedLocales: const [Locale('en'), Locale('es')],
       path: 'assets/translations',
       fallbackLocale: const Locale('en'),
-      child: BlocProvider<TourBloc>.value(
-        value: mockTourBloc,
-        child: MaterialApp(
-          home: Scaffold(
-            body: child,
-          ),
-        ),
+      startLocale: const Locale('en'),
+      child: MaterialApp.router(
+        routerConfig: goRouter,
       ),
     );
   }
 
-  group('TourSummary Widget Tests', () {
-    testWidgets(
-        'Muestra Snackbar y navega hacia atrás cuando ecoCityTour es null',
+  group('TourSelectionScreen Tests', () {
+    testWidgets('Renderiza correctamente todos los widgets principales',
         (WidgetTester tester) async {
-      when(() => mockTourBloc.state)
-          .thenReturn(const TourState(ecoCityTour: null));
-
-      await tester.pumpWidget(createTestWidget(const TourSummaryScreen()));
-
-      // Permite que se ejecute el `addPostFrameCallback` para el Snackbar
-      await tester.pump();
-      expect(find.text('empty_tour_message'.tr()), findsOneWidget);
-    });
-
-    testWidgets('Muestra cuadro de diálogo al tocar el botón de guardar',
-        (WidgetTester tester) async {
-      final ecoCityTour = EcoCityTour(
-        city: 'Ciudad de prueba',
-        pois: [],
-        mode: 'walking',
-        userPreferences: [],
-        duration: 120,
-        distance: 5.0,
-        polilynePoints: [],
+      when(() => mockGpsBloc.state).thenReturn(
+        const GpsState(isGpsEnabled: true, isGpsPermissionGranted: true),
       );
 
-      when(() => mockTourBloc.state)
-          .thenReturn(TourState(ecoCityTour: ecoCityTour));
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle(); // Asegura que todo se renderice
 
-      await tester.pumpWidget(createTestWidget(const TourSummaryScreen()));
+      expect(find.text('place_to_visit'.tr()), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
+      expect(find.text('your_interests'.tr()), findsOneWidget);
+      expect(find.text('eco_city_tour'.tr()), findsOneWidget);
+      expect(find.text('load_saved_route'.tr()), findsOneWidget);
+    });
 
-      await tester.tap(find.byIcon(Icons.save_as_rounded));
+    testWidgets('Dispara LoadTourEvent al pulsar el botón "eco_city_tour"',
+        (WidgetTester tester) async {
+      when(() => mockGpsBloc.state).thenReturn(
+        const GpsState(isGpsEnabled: true, isGpsPermissionGranted: true),
+      );
+      when(() => mockTourBloc.state).thenReturn(const TourState());
+
+      await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      expect(find.text('save_tour_name'.tr()), findsOneWidget);
-      expect(find.byType(TextField), findsOneWidget);
+      final requestButton = find.text('eco_city_tour'.tr());
+      expect(requestButton, findsOneWidget);
+
+      await tester.ensureVisible(requestButton); // Asegura visibilidad
+      await tester.tap(requestButton);
+      await tester.pump();
+
+      verify(() => mockTourBloc.add(any(that: isA<LoadTourEvent>()))).called(1);
+    });
+
+    testWidgets('Navega a SavedToursScreen al pulsar "load_saved_route"',
+        (WidgetTester tester) async {
+      when(() => mockGpsBloc.state).thenReturn(
+        const GpsState(isGpsEnabled: true, isGpsPermissionGranted: true),
+      );
+      when(() => mockTourBloc.state).thenReturn(const TourState());
+
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      final loadSavedToursButton = find.text('load_saved_route'.tr());
+      expect(loadSavedToursButton, findsOneWidget);
+
+      await tester.ensureVisible(loadSavedToursButton);
+      await tester.tap(loadSavedToursButton);
+      await tester.pumpAndSettle();
+
+      verify(() => mockTourBloc.add(any(that: isA<LoadSavedToursEvent>())))
+          .called(1);
+
+      expect(find.byType(SavedToursScreen), findsOneWidget);
     });
   });
 }
